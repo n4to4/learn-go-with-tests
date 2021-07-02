@@ -1,12 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"os"
 )
 
-func Countdown(writer io.Writer) {
-	writer.Write([]byte("3"))
+func Countdown(out io.Writer) {
+	fmt.Fprint(out, "3")
 }
 
 func main() {
