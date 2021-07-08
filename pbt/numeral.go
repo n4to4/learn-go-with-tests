@@ -1,8 +1,13 @@
 package numeral
 
+import "strings"
+
 func ConvertToRoman(arabic int) string {
-	if arabic == 2 {
-		return "II"
+	var result strings.Builder
+
+	for i := 0; i < arabic; i++ {
+		result.WriteString("I")
 	}
-	return "I"
+
+	return result.String()
 }
