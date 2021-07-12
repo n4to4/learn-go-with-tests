@@ -55,13 +55,11 @@ func minutesInRadians(t time.Time) float64 {
 }
 
 func secondHandPoint(t time.Time) Point {
-	angle := secondsInRadians(t)
-	return angleToPoint(angle)
+	return angleToPoint(secondsInRadians(t))
 }
 
 func minuteHandPoint(t time.Time) Point {
-	angle := minutesInRadians(t)
-	return angleToPoint(angle)
+	return angleToPoint(minutesInRadians(t))
 }
 
 func angleToPoint(angle float64) Point {
