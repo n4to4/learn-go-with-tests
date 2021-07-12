@@ -60,3 +60,10 @@ func secondHandPoint(t time.Time) Point {
 	y := math.Cos(angle)
 	return Point{x, y}
 }
+
+func minuteHandPoint(t time.Time) Point {
+	angle := minutesInRadians(t)
+	x := math.Sin(angle)
+	y := math.Cos(angle)
+	return Point{x, y}
+}
