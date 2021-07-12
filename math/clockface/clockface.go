@@ -40,7 +40,7 @@ func minuteHand(w io.Writer, t time.Time) {
 	p = Point{p.X * minuteHandLength, p.Y * minuteHandLength}
 	p = Point{p.X, -p.Y}
 	p = Point{p.X + clockCentreX, p.Y + clockCentreY}
-	fmt.Fprintf(w, `<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#f00;stroke-width:3px;"/>`, p.X, p.Y)
+	fmt.Fprintf(w, `<line x1="150" y1="150" x2="%.3f" y2="%.3f" style="fill:none;stroke:#000;stroke-width:3px;"/>`, p.X, p.Y)
 }
 
 const svgStart = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
