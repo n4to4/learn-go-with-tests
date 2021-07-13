@@ -13,7 +13,8 @@ const (
 )
 
 type Post struct {
-	Title, Description, Tags string
+	Title, Description string
+	Tags               []string
 }
 
 func newPost(postFile io.Reader) (Post, error) {
@@ -24,9 +25,17 @@ func newPost(postFile io.Reader) (Post, error) {
 		return strings.TrimPrefix(scanner.Text(), tagName)
 	}
 
+	title := readMetaLine(titleSeparator)
+	description := readMetaLine(descriptionSeparator)
+	tags := strings.Split(readMetaLine(tagsSeparator), ",")
+	var tags2 []string
+	for _, tag := range tags {
+		tags2 = append(tags2, strings.TrimSpace(tag))
+	}
+
 	return Post{
-		Title:       readMetaLine(titleSeparator),
-		Description: readMetaLine(descriptionSeparator),
-		Tags:        readMetaLine(tagsSeparator),
+		Title:       title,
+		Description: description,
+		Tags:        tags2,
 	}, nil
 }

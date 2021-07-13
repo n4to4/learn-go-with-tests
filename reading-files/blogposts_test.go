@@ -35,7 +35,7 @@ Tags: rust, tdd`
 	assertPost(t, posts[0], blogposts.Post{
 		Title:       "Post 1",
 		Description: "Description 1",
-		Tags:        "tdd, go",
+		Tags:        []string{"tdd", "go"},
 	})
 }
 
