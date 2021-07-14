@@ -1,10 +1,10 @@
-package server
+package main
 
 import (
 	"fmt"
 	"net/http"
 )
 
-func PlayerServer(writer http.ResponseWriter, request *http.Request) {
-	fmt.Fprintf(writer, "20")
+func PlayerServer(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "20")
 }
