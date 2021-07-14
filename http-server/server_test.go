@@ -22,6 +22,7 @@ func TestGETPlayers(t *testing.T) {
 
 		server.ServeHTTP(response, request)
 
+		assertStatus(t, response.Code, http.StatusOK)
 		assertResponseBody(t, response.Body.String(), "20")
 	})
 
@@ -31,6 +32,7 @@ func TestGETPlayers(t *testing.T) {
 
 		server.ServeHTTP(response, request)
 
+		assertStatus(t, response.Code, http.StatusOK)
 		assertResponseBody(t, response.Body.String(), "10")
 	})
 
@@ -40,12 +42,8 @@ func TestGETPlayers(t *testing.T) {
 
 		server.ServeHTTP(response, request)
 
-		got := response.Code
-		want := http.StatusNotFound
+		assertStatus(t, response.Code, http.StatusNotFound)
 
-		if got != want {
-			t.Errorf("got status %d want %d", got, want)
-		}
 	})
 }
 
@@ -60,6 +58,13 @@ func assertResponseBody(t testing.TB, got, want string) {
 		t.Errorf("response body is wrong, got %q want %q", got, want)
 	}
 
+}
+
+func assertStatus(t testing.TB, got, want int) {
+	t.Helper()
+	if got != want {
+		t.Errorf("got status %d want %d", got, want)
+	}
 }
 
 type StubPlayerScore struct {
