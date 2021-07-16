@@ -43,7 +43,9 @@ func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
 
 func (p *PlayerServer) getLeagueTable() []Player {
 	return []Player{
+		{"Cleo", 32},
 		{"Chris", 20},
+		{"Tiest", 14},
 	}
 }
 
