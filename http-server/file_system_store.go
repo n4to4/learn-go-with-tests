@@ -29,7 +29,9 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 	league := f.GetLeague()
 	player := league.Find(name)
 
-	if player != nil {
+	if player == nil {
+		league = append(league, Player{name, 1})
+	} else {
 		player.Wins++
 	}
 
