@@ -4,7 +4,8 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"poker"
+
+	poker "github.com/n4to4/learn-go-with-tests/http-server"
 )
 
 const dbFileName = "game.db.json"
