@@ -1,31 +1,33 @@
-package poker
+package poker_test
 
 import (
 	"strings"
 	"testing"
+
+	poker "github.com/n4to4/learn-go-with-tests/http-server"
 )
 
 func TestCLI(t *testing.T) {
 	t.Run("record chris win from user input", func(t *testing.T) {
 		in := strings.NewReader("Chris wins\n")
-		playerStore := &StubPlayerStore{}
-		cli := &CLI{playerStore, in}
+		playerStore := &poker.StubPlayerStore{}
+		cli := poker.NewCLI(playerStore, in)
 		cli.PlayPoker()
 
-		if len(playerStore.winCalls) != 1 {
+		if len(playerStore.WinCalls) != 1 {
 			t.Fatal("expected a win call but didn't get any")
 		}
 
-		assertPlayerWin(t, playerStore, "Chris")
+		poker.AssertPlayerWin(t, playerStore, "Chris")
 	})
 
 	t.Run("record cleo win from user input", func(t *testing.T) {
 		in := strings.NewReader("Cleo wins\n")
-		playerStore := &StubPlayerStore{}
+		playerStore := &poker.StubPlayerStore{}
 
-		cli := &CLI{playerStore, in}
+		cli := poker.NewCLI(playerStore, in)
 		cli.PlayPoker()
 
-		assertPlayerWin(t, playerStore, "Cleo")
+		poker.AssertPlayerWin(t, playerStore, "Cleo")
 	})
 }
