@@ -32,7 +32,8 @@ func (cli *CLI) scheduleBlindAlerts() {
 	blindTime := 0 * time.Second
 	for _, blind := range blinds {
 		cli.alerter.ScheduleAlertAt(blindTime, blind)
-		blindTime = blindTime + 10*time.Minute
+		//blindTime = blindTime + 10*time.Minute
+		blindTime = blindTime + 10*time.Second
 	}
 }
 
@@ -43,8 +44,4 @@ func (cli *CLI) readLine() string {
 
 func extractWinner(userInput string) string {
 	return strings.Replace(userInput, " wins", "", 1)
-}
-
-type BlindAlerter interface {
-	ScheduleAlertAt(duration time.Duration, amount int)
 }
