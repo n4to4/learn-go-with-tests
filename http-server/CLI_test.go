@@ -1,6 +1,7 @@
 package poker_test
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 	"testing"
@@ -12,9 +13,10 @@ import (
 func TestCLI(t *testing.T) {
 	t.Run("record chris win from user input", func(t *testing.T) {
 		in := strings.NewReader("Chris wins\n")
+		stdout := &bytes.Buffer{}
 		playerStore := &poker.StubPlayerStore{}
 		dummySpyAlerter := &SpyBlindAlerter{}
-		cli := poker.NewCLI(playerStore, in, dummySpyAlerter)
+		cli := poker.NewCLI(playerStore, in, stdout, dummySpyAlerter)
 		cli.PlayPoker()
 
 		if len(playerStore.WinCalls) != 1 {
@@ -26,10 +28,11 @@ func TestCLI(t *testing.T) {
 
 	t.Run("record cleo win from user input", func(t *testing.T) {
 		in := strings.NewReader("Cleo wins\n")
+		stdout := &bytes.Buffer{}
 		playerStore := &poker.StubPlayerStore{}
 		dummySpyAlerter := &SpyBlindAlerter{}
 
-		cli := poker.NewCLI(playerStore, in, dummySpyAlerter)
+		cli := poker.NewCLI(playerStore, in, stdout, dummySpyAlerter)
 		cli.PlayPoker()
 
 		poker.AssertPlayerWin(t, playerStore, "Cleo")
@@ -37,10 +40,11 @@ func TestCLI(t *testing.T) {
 
 	t.Run("it schedules printing of blind values", func(t *testing.T) {
 		in := strings.NewReader("Chris wins\n")
+		stdout := &bytes.Buffer{}
 		playerStore := &poker.StubPlayerStore{}
 		blindAlerter := &SpyBlindAlerter{}
 
-		cli := poker.NewCLI(playerStore, in, blindAlerter)
+		cli := poker.NewCLI(playerStore, in, stdout, blindAlerter)
 		cli.PlayPoker()
 
 		cases := []scheduledAlert{
@@ -66,6 +70,26 @@ func TestCLI(t *testing.T) {
 				got := blindAlerter.alerts[i]
 				assertScheduledAlert(t, got, want)
 			})
+		}
+	})
+
+	var dummyBlindAlerter = &SpyBlindAlerter{}
+	var dummyPlayerStore = &poker.StubPlayerStore{}
+	var dummyStdIn = &bytes.Buffer{}
+	//var dummyStdOut = &bytes.Buffer{}
+
+	t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
+		stdout := &bytes.Buffer{}
+		cli := poker.NewCLI(
+			dummyPlayerStore, dummyStdIn, stdout, dummyBlindAlerter,
+		)
+		cli.PlayPoker()
+
+		got := stdout.String()
+		want := "Please enter the number of players: "
+
+		if got != want {
+			t.Errorf("got %q, want %q", got, want)
 		}
 	})
 }
