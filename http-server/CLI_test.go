@@ -14,9 +14,11 @@ func TestCLI(t *testing.T) {
 	t.Run("record chris win from user input", func(t *testing.T) {
 		in := strings.NewReader("5\nChris wins\n")
 		stdout := &bytes.Buffer{}
+
 		playerStore := &poker.StubPlayerStore{}
-		dummySpyAlerter := &SpyBlindAlerter{}
-		cli := poker.NewCLI(playerStore, in, stdout, dummySpyAlerter)
+		game := poker.NewGame(&SpyBlindAlerter{}, playerStore)
+
+		cli := poker.NewCLI(in, stdout, game)
 		cli.PlayPoker()
 
 		if len(playerStore.WinCalls) != 1 {
@@ -29,10 +31,12 @@ func TestCLI(t *testing.T) {
 	t.Run("record cleo win from user input", func(t *testing.T) {
 		in := strings.NewReader("5\nCleo wins\n")
 		stdout := &bytes.Buffer{}
+
 		playerStore := &poker.StubPlayerStore{}
 		dummySpyAlerter := &SpyBlindAlerter{}
+		game := poker.NewGame(dummySpyAlerter, playerStore)
 
-		cli := poker.NewCLI(playerStore, in, stdout, dummySpyAlerter)
+		cli := poker.NewCLI(in, stdout, game)
 		cli.PlayPoker()
 
 		poker.AssertPlayerWin(t, playerStore, "Cleo")
@@ -41,10 +45,11 @@ func TestCLI(t *testing.T) {
 	t.Run("it schedules printing of blind values", func(t *testing.T) {
 		in := strings.NewReader("5\nChris wins\n")
 		stdout := &bytes.Buffer{}
-		playerStore := &poker.StubPlayerStore{}
-		blindAlerter := &SpyBlindAlerter{}
 
-		cli := poker.NewCLI(playerStore, in, stdout, blindAlerter)
+		blindAlerter := &SpyBlindAlerter{}
+		game := poker.NewGame(blindAlerter, &poker.StubPlayerStore{})
+
+		cli := poker.NewCLI(in, stdout, game)
 		cli.PlayPoker()
 
 		cases := []scheduledAlert{
@@ -73,17 +78,16 @@ func TestCLI(t *testing.T) {
 		}
 	})
 
-	//var dummyBlindAlerter = &SpyBlindAlerter{}
 	var dummyPlayerStore = &poker.StubPlayerStore{}
-	//var dummyStdIn = &bytes.Buffer{}
-	//var dummyStdOut = &bytes.Buffer{}
 
 	t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
 		stdout := &bytes.Buffer{}
 		in := strings.NewReader("7\n")
-		blindAlerter := &SpyBlindAlerter{}
 
-		cli := poker.NewCLI(dummyPlayerStore, in, stdout, blindAlerter)
+		blindAlerter := &SpyBlindAlerter{}
+		game := poker.NewGame(blindAlerter, dummyPlayerStore)
+
+		cli := poker.NewCLI(in, stdout, game)
 		cli.PlayPoker()
 
 		got := stdout.String()
