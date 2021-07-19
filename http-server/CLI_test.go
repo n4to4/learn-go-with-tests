@@ -88,11 +88,8 @@ func (s scheduledAlert) String() string {
 }
 
 func assertScheduledAlert(t testing.TB, got, want scheduledAlert) {
-	if got.amount != want.amount {
-		t.Errorf("got amount %d, want %d", got.amount, want.amount)
-	}
-
-	if got.at != want.at {
-		t.Errorf("got scheduled time of %v, want %v", got.at, want.at)
+	t.Helper()
+	if got != want {
+		t.Errorf("got %+v, want %+v", got, want)
 	}
 }
