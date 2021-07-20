@@ -9,9 +9,11 @@ import (
 )
 
 func TestGame_Start(t *testing.T) {
+	var dummyPlayerStore = &poker.StubPlayerStore{}
+
 	t.Run("schedules alerts on game start for 5 players", func(t *testing.T) {
 		blindAlerter := &poker.SpyBlindAlerter{}
-		game := poker.NewGame(blindAlerter, &poker.StubPlayerStore{})
+		game := poker.NewGame(blindAlerter, dummyPlayerStore)
 
 		game.Start(5)
 
@@ -34,7 +36,7 @@ func TestGame_Start(t *testing.T) {
 
 	t.Run("schedules alerts on game start for 7 players", func(t *testing.T) {
 		blindAlerter := &poker.SpyBlindAlerter{}
-		game := poker.NewGame(blindAlerter, &poker.StubPlayerStore{})
+		game := poker.NewGame(blindAlerter, dummyPlayerStore)
 
 		game.Start(7)
 
@@ -47,6 +49,17 @@ func TestGame_Start(t *testing.T) {
 
 		checkSchedulingCases(cases, t, blindAlerter)
 	})
+}
+
+func TestGame_Finish(t *testing.T) {
+	dummyBlindAlerter := &poker.SpyBlindAlerter{}
+	store := &poker.StubPlayerStore{}
+
+	game := poker.NewGame(dummyBlindAlerter, store)
+	winner := "Ruth"
+
+	game.Finish(winner)
+	poker.AssertPlayerWin(t, store, winner)
 }
 
 func checkSchedulingCases(
