@@ -2,117 +2,91 @@ package poker_test
 
 import (
 	"bytes"
-	"fmt"
+	"io"
 	"strings"
 	"testing"
-	"time"
 
 	poker "github.com/n4to4/learn-go-with-tests/http-server"
 )
 
+var dummyBlindAlerter = &poker.SpyBlindAlerter{}
+var dummyPlayerStore = &poker.StubPlayerStore{}
+var dummyStdIn = &bytes.Buffer{}
+var dummyStdOut = &bytes.Buffer{}
+
 func TestCLI(t *testing.T) {
-	t.Run("record chris win from user input", func(t *testing.T) {
-		in := strings.NewReader("5\nChris wins\n")
-		stdout := &bytes.Buffer{}
-
-		playerStore := &poker.StubPlayerStore{}
-		game := poker.NewGame(&poker.SpyBlindAlerter{}, playerStore)
-
-		cli := poker.NewCLI(in, stdout, game)
-		cli.PlayPoker()
-
-		if len(playerStore.WinCalls) != 1 {
-			t.Fatal("expected a win call but didn't get any")
-		}
-
-		poker.AssertPlayerWin(t, playerStore, "Chris")
-	})
-
-	t.Run("record cleo win from user input", func(t *testing.T) {
-		in := strings.NewReader("5\nCleo wins\n")
-		stdout := &bytes.Buffer{}
-
-		playerStore := &poker.StubPlayerStore{}
-		dummySpyAlerter := &poker.SpyBlindAlerter{}
-		game := poker.NewGame(dummySpyAlerter, playerStore)
-
-		cli := poker.NewCLI(in, stdout, game)
-		cli.PlayPoker()
-
-		poker.AssertPlayerWin(t, playerStore, "Cleo")
-	})
-
-	t.Run("it schedules printing of blind values", func(t *testing.T) {
-		in := strings.NewReader("5\nChris wins\n")
-		stdout := &bytes.Buffer{}
-
-		blindAlerter := &poker.SpyBlindAlerter{}
-		game := poker.NewGame(blindAlerter, &poker.StubPlayerStore{})
-
-		cli := poker.NewCLI(in, stdout, game)
-		cli.PlayPoker()
-
-		cases := []poker.ScheduledAlert{
-			{0 * time.Second, 100},
-			{10 * time.Minute, 200},
-			{20 * time.Minute, 300},
-			{30 * time.Minute, 400},
-			{40 * time.Minute, 500},
-			{50 * time.Minute, 600},
-			{60 * time.Minute, 800},
-			{70 * time.Minute, 1000},
-			{80 * time.Minute, 2000},
-			{90 * time.Minute, 4000},
-			{100 * time.Minute, 8000},
-		}
-
-		for i, want := range cases {
-			t.Run(fmt.Sprint(want), func(t *testing.T) {
-				if len(blindAlerter.Alerts) <= i {
-					t.Fatalf("alert %d was not scheduled %v", i, blindAlerter.Alerts)
-				}
-
-				got := blindAlerter.Alerts[i]
-				poker.AssertScheduledAlert(t, got, want)
-			})
-		}
-	})
-
-	var dummyPlayerStore = &poker.StubPlayerStore{}
-
-	t.Run("it prompts the user to enter the number of players", func(t *testing.T) {
-		stdout := &bytes.Buffer{}
+	t.Run("it prompts the user to enter the number of players and start the game", func(t *testing.T) {
 		in := strings.NewReader("7\n")
-
-		blindAlerter := &poker.SpyBlindAlerter{}
-		game := poker.NewGame(blindAlerter, dummyPlayerStore)
+		stdout := &bytes.Buffer{}
+		game := &GameSpy{}
 
 		cli := poker.NewCLI(in, stdout, game)
 		cli.PlayPoker()
 
-		got := stdout.String()
-		want := poker.PlayerPrompt
+		gotPrompt := stdout.String()
+		wantPrompt := poker.PlayerPrompt
 
-		if got != want {
-			t.Errorf("got %q, want %q", got, want)
-		}
-
-		cases := []poker.ScheduledAlert{
-			{0 * time.Second, 100},
-			{12 * time.Minute, 200},
-			{24 * time.Minute, 300},
-			{36 * time.Minute, 400},
-		}
-
-		for i, want := range cases {
-			t.Run(fmt.Sprint(want), func(t *testing.T) {
-				if len(blindAlerter.Alerts) <= i {
-					t.Fatalf("alert %d was not scheduled %v", i, blindAlerter.Alerts)
-				}
-
-				got := blindAlerter.Alerts[i]
-				poker.AssertScheduledAlert(t, got, want)
-			})
+		if gotPrompt != wantPrompt {
+			t.Errorf("got %q, want %q", gotPrompt, wantPrompt)
 		}
 	})
+
+	t.Run("finish game with 'Chris' as winner", func(t *testing.T) {
+		in := strings.NewReader("1\nChris wins\n")
+		game := &GameSpy{}
+		cli := poker.NewCLI(in, dummyStdOut, game)
+
+		cli.PlayPoker()
+
+		if game.FinishedWith != "Chris" {
+			t.Errorf("expected finish called with 'Chris' but got %q", game.FinishedWith)
+		}
+	})
+
+	t.Run("record 'Cleo' win from user input", func(t *testing.T) {
+		in := strings.NewReader("1\nCleo wins\n")
+		game := &GameSpy{}
+		cli := poker.NewCLI(in, dummyStdOut, game)
+
+		cli.PlayPoker()
+
+		if game.FinishedWith != "Cleo" {
+			t.Errorf("expected finish called with 'Cleo' but got %q", game.FinishedWith)
+		}
+	})
+
+	//t.Run("do not read beyond the first newline", func(t *testing.T) {
+	//	in := failOnEndReader{
+	//		t,
+	//		strings.NewReader("1\nChris wins\nhello there"),
+	//	}
+	//})
+}
+
+type GameSpy struct {
+	StartedWith  int
+	FinishedWith string
+}
+
+func (g *GameSpy) Start(numberOfPlayers int) {
+	g.StartedWith = numberOfPlayers
+}
+
+func (g *GameSpy) Finish(winner string) {
+	g.FinishedWith = winner
+}
+
+type failOnEndReader struct {
+	t   *testing.T
+	rdr io.Reader
+}
+
+func (m failOnEndReader) Read(p []byte) (n int, err error) {
+	n, err = m.rdr.Read(p)
+
+	if n == 0 || err == io.EOF {
+		m.t.Fatal("Read to the end when you shouldn't have")
+	}
+
+	return n, err
 }
