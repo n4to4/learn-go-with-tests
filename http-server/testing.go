@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+	"time"
 )
 
 // stub
@@ -101,4 +102,28 @@ func getLeagueFromResponse(t testing.TB, body io.Reader) []Player {
 	}
 
 	return league
+}
+
+type SpyBlindAlerter struct {
+	Alerts []ScheduledAlert
+}
+
+func (s *SpyBlindAlerter) ScheduleAlertAt(at time.Duration, amount int) {
+	s.Alerts = append(s.Alerts, ScheduledAlert{at, amount})
+}
+
+type ScheduledAlert struct {
+	At     time.Duration
+	Amount int
+}
+
+func (s ScheduledAlert) String() string {
+	return fmt.Sprintf("%d chips at %v", s.Amount, s.At)
+}
+
+func AssertScheduledAlert(t testing.TB, got, want ScheduledAlert) {
+	t.Helper()
+	if got != want {
+		t.Errorf("got %+v, want %+v", got, want)
+	}
 }
