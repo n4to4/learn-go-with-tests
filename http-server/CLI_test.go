@@ -2,16 +2,12 @@ package poker_test
 
 import (
 	"bytes"
-	"io"
 	"strings"
 	"testing"
 
 	poker "github.com/n4to4/learn-go-with-tests/http-server"
 )
 
-var dummyBlindAlerter = &poker.SpyBlindAlerter{}
-var dummyPlayerStore = &poker.StubPlayerStore{}
-var dummyStdIn = &bytes.Buffer{}
 var dummyStdOut = &bytes.Buffer{}
 
 func TestCLI(t *testing.T) {
@@ -74,12 +70,7 @@ func TestCLI(t *testing.T) {
 			t.Errorf("game should not have started")
 		}
 
-		gotPrompt := stdout.String()
-		wantPrompt := poker.PlayerPrompt + poker.BadPlayerInputErrMsg
-
-		if gotPrompt != wantPrompt {
-			t.Errorf("got %q, want %q", gotPrompt, wantPrompt)
-		}
+		assertMessagesSentToUser(t, stdout, poker.PlayerPrompt, poker.BadPlayerInputErrMsg)
 	})
 }
 
@@ -99,17 +90,26 @@ func (g *GameSpy) Finish(winner string) {
 	g.FinishedWith = winner
 }
 
-type failOnEndReader struct {
-	t   *testing.T
-	rdr io.Reader
-}
+//type failOnEndReader struct {
+//	t   *testing.T
+//	rdr io.Reader
+//}
+//
+//func (m failOnEndReader) Read(p []byte) (n int, err error) {
+//	n, err = m.rdr.Read(p)
+//
+//	if n == 0 || err == io.EOF {
+//		m.t.Fatal("Read to the end when you shouldn't have")
+//	}
+//
+//	return n, err
+//}
 
-func (m failOnEndReader) Read(p []byte) (n int, err error) {
-	n, err = m.rdr.Read(p)
-
-	if n == 0 || err == io.EOF {
-		m.t.Fatal("Read to the end when you shouldn't have")
+func assertMessagesSentToUser(t testing.TB, stdout *bytes.Buffer, messages ...string) {
+	t.Helper()
+	want := strings.Join(messages, "")
+	got := stdout.String()
+	if got != want {
+		t.Errorf("got %q sent to stdout but expected %+v", got, messages)
 	}
-
-	return n, err
 }
