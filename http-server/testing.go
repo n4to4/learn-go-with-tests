@@ -92,6 +92,11 @@ func newLeagueRequest() *http.Request {
 	return req
 }
 
+func newGameRequest() *http.Request {
+	req, _ := http.NewRequest(http.MethodGet, "/game", nil)
+	return req
+}
+
 func getLeagueFromResponse(t testing.TB, body io.Reader) []Player {
 	t.Helper()
 	league, err := NewLeague(body)
