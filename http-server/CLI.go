@@ -11,11 +11,6 @@ import (
 const PlayerPrompt = "Please enter the number of players: "
 const BadPlayerInputErrMsg = "Bad value received for number of players, please try again with a number"
 
-type Game interface {
-	Start(numberOfPlayers int)
-	Finish(winner string)
-}
-
 type CLI struct {
 	in   *bufio.Scanner
 	out  io.Writer
@@ -41,7 +36,7 @@ func (cli *CLI) PlayPoker() {
 		return
 	}
 
-	cli.game.Start(numberOfPlayers)
+	cli.game.Start(numberOfPlayers, cli.out)
 
 	winnerInput := cli.readLine()
 	winner := extractWinner(winnerInput)
